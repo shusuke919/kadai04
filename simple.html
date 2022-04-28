@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<title>Firebase:v9:Chatアプリ</title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- コンテンツ表示画面 -->
+<main>
+<div>
+    <div> 名前：<input type="text" id="uname"> </div>
+    <div>
+        <textarea id="text" cols="30" rows="10"></textarea>
+        <button id="send">送信</button>
+        
+       
+    </div>
+    <div id="output"></div>
+</div>
+
+</main>
+<!--/ コンテンツ表示画面 -->
+
+
+
+<!-- JQuery -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<!-- JQuery -->
+
+
+<!--** 以下Firebase **-->
+<script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      push,
+      set,
+      onChildAdded,
+      remove,
+      onChildRemoved,
+    } from "https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js";
+    // Your web app's Firebase configuration
+   const firebaseConfig = {
+  apiKey: "AIzaSyDKJZItBdx45d_9e3otQatcxWRJIjTquwM",
+  authDomain: "gs23-e7946.firebaseapp.com",
+  projectId: "gs23-e7946",
+  storageBucket: "gs23-e7946.appspot.com",
+  messagingSenderId: "404238532520",
+  appId: "1:404238532520:web:41a512e3080bce32a1679d"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app); //RealtimeDBに接続
+const dbRef = ref(db,"日記"); //RealtimeDB内の"chat"を使う
+
+
+//送信のボタンが押されたらデータを登録する処理を書きます
+
+$('#send').on("click", function(){
+
+const unameValue = $("#uname").val();
+const text = $("#text").val();
+
+//必ず！入力されたものが取得できているか、コンソール　ログを使って確認する！！
+
+console.log(unameValue, '名前');
+console.log(text, 'テキスト');
+
+
+//データの塊を作る
+
+const msg = {
+    uname: unameValue,
+    text: text,
+}
+
+const newPostRef = push(dbRef);
+set(newPostRef, msg);
+
+//入力欄を空にする
+$("#uname").val("");//空にする
+$("#text").val("");//空にする
+
+//この下は消さない
+});
+
+  // 受信処理を記述します🤗
+  onChildAdded(dbRef, function (data) {
+        const msg = data.val();
+        const key = data.key;
+        console.log(msg, "dataを取得");
+        console.log(key, "鍵を取得");
+
+        let html = `
+        <div class="${key}">
+            <p>${msg.uname}</p>
+            <p>${msg.text}</p>
+            <input type="button" value="削除" class="delete">
+            <input type="button" value="更新" class="update">
+            </div>
+          `;
+
+        $("#output").append(html);
+      });
+  
+
+      //エンターキーを押したら送信
+      $("#text").on("keydown", function (e){
+        console.log(e, "eventだよ");
+
+        if(e.keyCode === 13){
+
+            const unameValue = $("#uname").val();
+const text = $("#text").val();
+
+//必ず！入力されたものが取得できているか、コンソール　ログを使って確認する！！
+
+console.log(unameValue, '名前');
+console.log(text, 'テキスト');
+
+
+//データの塊を作る
+
+const msg = {
+    uname: unameValue,
+    text: text,
+}
+
+const newPostRef = push(dbRef);
+set(newPostRef, msg);
+
+//入力欄を空にする
+$("#uname").val("");//空にする
+$("#text").val("");//空にする
+
+
+        }
+
+
+      });
+
+
+      //全削除機能
+    //   $(document).on("click",".delete", function(){
+    //     const deleteKey = $(this).parent().attr('class');　
+    //     //削除ボタンの親Divの固有Classを取得
+    //     console.log(deleteKey);
+    //     //ちゃんと取得できていることは確認済み
+    // //   remove(dbRef);
+    // //   これでは全部消えてしまう
+    //   });
+
+//1件ずつ削除する機能
+      $(document).on("click",".delete", function(){
+　　const deleteKey = $(this).parent().attr('class');　
+    const dbRef = ref(db,`日記/${deleteKey}`);
+	remove(dbRef);
+});
+
+//更新機能
+$(document).on("click",".update", function(){
+　　const updateKey = $(this).parent().attr('class');　
+console.log(updateKey);
+$("#uname").val(updateKey);//空にする
+$("#text").val(updateKey);//空にする
+    
+
+
+
+
+
+
+});
+
+
+  </script>
+
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
